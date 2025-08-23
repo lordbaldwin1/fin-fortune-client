@@ -8,9 +8,15 @@ type Instruments = {
   symbol: string;
 };
 
+type Fortune = {
+  fortune: string;
+};
+
 export default function HomePage() {
   const { user, loading } = useAuth();
   const [symbols, setSymbols] = useState<string[]>([]);
+  const [selectedSymbol, setSelectedSymbol] = useState<string>("AAPL");
+  const [error, setError] = useState<string>("");
   const [fortune, setFortune] = useState<string>("");
 
   useEffect(() => {
@@ -28,14 +34,40 @@ export default function HomePage() {
     })();
   }, [])
 
+  async function getFortune() {
+    if (selectedSymbol.length === 0) {
+      setError("I cannot make a fortune of nothing.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${config.BACKEND_API_URL}/fortunes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ symbol: selectedSymbol }),
+        credentials: "include",
+      });
+      if(res.ok) {
+        const newFortune = (await res.json()) as Fortune;
+        setFortune(newFortune.fortune);
+        return;
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+    }
+  }
+
   return (
     <>
       <Navbar />
       <Link to={"/login"}>Sign in</Link>
-      <button>Unveil your fortune</button>
+      <button onClick={getFortune}>Unveil your fortune</button>
       {symbols.map((symbol) => {
         return <p key={symbol}>{symbol}</p>
       })}
+      <p>{fortune}</p>
     </>
   );
 }
