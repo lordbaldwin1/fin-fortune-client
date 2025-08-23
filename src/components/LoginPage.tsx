@@ -61,10 +61,10 @@ function CreateAccountPortal({
       setIsSignIn(true);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        setError("That user may already exist.");
         return;
       }
-      setError("Unknown error occurred, try again later.");
+      setError("Unknown error has occurred. Try again later.")
     } finally {
       setIsLoading(false);
     }
