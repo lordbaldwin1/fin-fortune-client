@@ -1,10 +1,10 @@
 import { useState, type SetStateAction } from "react";
-import { config } from "./config";
-import type { CreateUserRequest, LoginResponse } from "./types/api";
+import { config } from "../config";
+import type { CreateUserRequest, User } from "../types/api";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router";
 
-export default function SignInPage() {
+export default function LoginPage() {
   const [isSignIn, setIsSignIn] = useState<boolean>(true);
   return (
     <div className="w-full h-screen flex flex-col items-center justify-center gap-2">
@@ -31,17 +31,17 @@ function CreateAccountPortal({
 
   async function createAccount() {
     setIsLoading(true);
-    console.log(username, password);
-    if (username.length === 0 || password.length === 0) {
-      setError("You must enter an username and password.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
 
     try {
+      if (username.length === 0 || password.length === 0) {
+        setError("You must enter an username and password.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        setError("Passwords do not match.");
+        return;
+      }
+
       const params: CreateUserRequest = {
         email: username,
         password: password,
@@ -131,6 +131,7 @@ function LoginPortal({
 
   const navigate = useNavigate();
   async function loginToAccount() {
+    setIsLoading(true);
     if (username.length === 0 || password.length === 0) {
       setError("You must enter an username and password");
       return;
@@ -147,13 +148,18 @@ function LoginPortal({
           "Content-Type": "application/json",
         },
         body: JSON.stringify(params),
+        credentials: "include",
       });
-      const data = await res.json() as LoginResponse;
-      if (!data.token) {
-        setError("No access token returned from server");
+      if (!res.ok) {
+        setError(`Are you sure that account exists?`)
         return;
       }
-      localStorage.setItem("accessToken", data.token);
+      const data = await res.json() as User;
+      if (!data) {
+        setError("Failed to get user");
+        return;
+      }
+      console.log(data);
       navigate("/");
     } catch (err: unknown) {
       if (err instanceof Error) {

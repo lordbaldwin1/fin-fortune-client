@@ -1,20 +1,31 @@
 export type CreateUserRequest = {
-    email: string,
-    password: string,
+  email: string;
+  password: string;
 };
 
 export type CreateUserResponse = {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        email: string;
-        hashedPassword: string;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  email: string;
+  hashedPassword: string;
 };
 
-export type LoginResponse = {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    email: string;
-    token: string;
-}
+// export type LoginResponse = {
+//   id: string;
+//   createdAt: Date;
+//   updatedAt: Date;
+//   email: string;
+//   token: string;
+// };
+
+export type User = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  email: string;
+};
+
+// export type RefreshResponse = {
+//   token: string;
+// };
