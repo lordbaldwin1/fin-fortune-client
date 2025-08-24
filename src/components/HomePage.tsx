@@ -62,7 +62,6 @@ export default function HomePage() {
   return (
     <>
       <Navbar />
-      <Link to={"/login"}>Sign in</Link>
       <button onClick={getFortune}>Unveil your fortune</button>
       {symbols.map((symbol) => {
         return <p key={symbol}>{symbol}</p>
