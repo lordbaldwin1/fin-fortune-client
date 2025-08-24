@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { checkAuth } from './auth';
 import type { User } from '../types/api';
 import { config } from '../config';
+import { useNavigate } from 'react-router';
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const authenticate = async () => {
@@ -37,6 +39,7 @@ export function useAuth() {
     }
     setUser(null);
     setError(null);
+    navigate(0);
   };
 
   return {

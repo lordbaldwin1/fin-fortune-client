@@ -7,8 +7,7 @@ import { Button } from "./ui/button";
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
   return (
-    <div className="flex flex-row justify-between p-2">
-      <h1 className="text-xl">Fortune Teller</h1>
+    <div className="flex flex-row justify-end p-2">
       <div className="flex flex-row items-center">
         {loading ? (
           <div>
@@ -28,7 +27,7 @@ export default function Navbar() {
           <div className="flex justify-end">
             <Button className="hover:scale-110" variant={"link"} size={"icon"}>
               <Link to={"/login"}>
-                <LogIn />
+                <User />
               </Link>
             </Button>
           </div>
