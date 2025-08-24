@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { LoaderCircle, LogIn, LogOut, User } from "lucide-react";
+import { LoaderCircle, LogOut, User } from "lucide-react";
 import { useAuth } from "../auth/useAuth";
 import { ModeToggle } from "./ui/ModeToggle";
 import { Button } from "./ui/button";
