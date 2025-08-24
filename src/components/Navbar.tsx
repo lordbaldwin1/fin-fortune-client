@@ -1,7 +1,8 @@
 import { Link } from "react-router";
-import { LoaderCircle, User } from "lucide-react";
+import { LoaderCircle, LogIn, LogOut, User } from "lucide-react";
 import { useAuth } from "../auth/useAuth";
 import { ModeToggle } from "./ui/ModeToggle";
+import { Button } from "./ui/button";
 
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
@@ -14,16 +15,22 @@ export default function Navbar() {
             <LoaderCircle className="animate-spin mr-4" />
           </div>
         ) : user ? (
-          <div className="flex flex-row justify-end gap-3">
+          <div className="flex flex-row items-center justify-end gap-3">
             <div className="flex flex-row gap-1">
               <User />
               <p>{user.email}</p>
             </div>
-            <button onClick={logout}>Sign out</button>
+            <Button variant={"link"} size={"icon"} className="hover:scale-110" onClick={logout}>
+              <LogOut className="hover:scale-110" />
+            </Button>
           </div>
         ) : (
           <div className="flex justify-end">
-            <Link to={"/login"}>Sign in</Link>
+            <Button className="hover:scale-110" variant={"link"} size={"icon"}>
+              <Link to={"/login"}>
+                <LogIn />
+              </Link>
+            </Button>
           </div>
         )}
         <ModeToggle />

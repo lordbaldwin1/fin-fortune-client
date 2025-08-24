@@ -3,6 +3,8 @@ import Navbar from "./Navbar";
 import { useAuth } from "../auth/useAuth";
 import { useEffect, useState } from "react";
 import { config } from "../config";
+import { Button } from "./ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 type Instruments = {
   symbol: string;
@@ -28,11 +30,11 @@ export default function HomePage() {
         },
       });
       if (res.ok) {
-        const data = (await res.json()) as Instruments[]
+        const data = (await res.json()) as Instruments[];
         setSymbols(data.map((instrument) => instrument.symbol));
       }
     })();
-  }, [])
+  }, []);
 
   async function getFortune() {
     if (selectedSymbol.length === 0) {
@@ -49,7 +51,7 @@ export default function HomePage() {
         body: JSON.stringify({ symbol: selectedSymbol }),
         credentials: "include",
       });
-      if(res.ok) {
+      if (res.ok) {
         const newFortune = (await res.json()) as Fortune;
         setFortune(newFortune.fortune);
         return;
@@ -62,9 +64,22 @@ export default function HomePage() {
   return (
     <>
       <Navbar />
-      <button onClick={getFortune}>Unveil your fortune</button>
+      {user ? (
+        <Button onClick={getFortune}>Unveil your fortune</Button>
+      ) : (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button className="hover:cursor-not-allowed">
+              Unveil your fortune
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <Link to={"/login"}>Sign in to unveil your fortune.</Link>
+          </TooltipContent>
+        </Tooltip>
+      )}
       {symbols.map((symbol) => {
-        return <p key={symbol}>{symbol}</p>
+        return <p key={symbol}>{symbol}</p>;
       })}
       <p>{fortune}</p>
     </>

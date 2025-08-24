@@ -8,7 +8,6 @@ export async function checkAuth() {
       credentials: "include",
     });
 
-    console.log(res.status);
     if (res.ok) {
       const user = (await res.json()) as User;
       return user;
@@ -45,7 +44,6 @@ export async function checkAuth() {
 
     return null;
   } catch (err: unknown) {
-    console.error(err);
     return null;
   }
 }

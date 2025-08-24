@@ -1,237 +1,218 @@
 import { useState, type SetStateAction } from "react";
 import { config } from "../config";
-import type { CreateUserRequest, User } from "../types/api";
+import type { User } from "../types/api";
 import { LoaderCircle } from "lucide-react";
 import { useNavigate } from "react-router";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { useAuth } from "@/auth/useAuth";
 
 export default function LoginPage() {
   const [isSignIn, setIsSignIn] = useState<boolean>(true);
+  const { user } = useAuth();
+
   return (
-    <div className="w-full h-screen flex flex-col items-center justify-center gap-2">
-      <h1 className="text-2xl">{isSignIn ? "Sign in" : "Create an account"}</h1>
-      {isSignIn ? (
-        <LoginPortal setIsSignIn={setIsSignIn} />
+    <div className="w-full h-screen flex flex-col items-center justify-center gap-4">
+      {user ? (
+        <>
+          <h1 className="text-2xl font-semibold">You are already signed in!</h1>
+          <Button variant={"link"}>
+            Click here to have your fortune told.
+          </Button>
+        </>
       ) : (
-        <CreateAccountPortal setIsSignIn={setIsSignIn} />
+        <>
+          <h1 className="text-2xl font-semibold">
+            {isSignIn ? "Sign in" : "Create an account"}
+          </h1>
+
+          {isSignIn ? (
+            <LoginForm setIsSignIn={setIsSignIn} />
+          ) : (
+            <CreateAccountForm setIsSignIn={setIsSignIn} />
+          )}
+        </>
       )}
     </div>
   );
 }
 
-function CreateAccountPortal({
+function LoginForm({
   setIsSignIn,
 }: {
   setIsSignIn: React.Dispatch<SetStateAction<boolean>>;
 }) {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-
-  async function createAccount() {
-    setIsLoading(true);
-
-    try {
-      if (username.length === 0 || password.length === 0) {
-        setError("You must enter an username and password.");
-        return;
-      }
-      if (password !== confirmPassword) {
-        setError("Passwords do not match.");
-        return;
-      }
-
-      const params: CreateUserRequest = {
-        email: username,
-        password: password,
-      };
-      const res = await fetch(`${config.BACKEND_API_URL}/users/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        setError(errorData.error || "Failed to create user");
-        return;
-      }
-      setIsSignIn(true);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError("That user may already exist.");
-        return;
-      }
-      setError("Unknown error has occurred. Try again later.")
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  return (
-    <>
-      <div className="gap-2">
-        {error.length > 0 && <p className="text-red-400">{error}</p>}
-      </div>
-      <div className="flex flex-col gap-2">
-        <LoginInput
-          updateState={setUsername}
-          placeholder="Enter your username"
-          value={username}
-          type="text"
-        />
-        <LoginInput
-          updateState={setPassword}
-          placeholder="Enter your password"
-          value={password}
-          type="password"
-        />
-        <LoginInput
-          updateState={setConfirmPassword}
-          placeholder="Confirm your password"
-          value={confirmPassword}
-          type="password"
-        />
-      </div>
-      <div className="flex flex-col gap-2">
-        <button
-          className="bg-blue-200 hover:bg-blue-300 rounded-md gap-2 p-2"
-          onClick={createAccount}
-        >
-          {isLoading ? (
-            <span className="flex justify-center items-center w-full">
-              <LoaderCircle className="animate-spin" />
-            </span>
-          ) : (
-            "Create Account"
-          )}
-        </button>
-        <button
-          className="text-sm rounded-md"
-          onClick={() => setIsSignIn(true)}
-        >
-          Already have an account? Sign in.
-        </button>
-      </div>
-    </>
-  );
-}
-
-function LoginPortal({
-  setIsSignIn,
-}: {
-  setIsSignIn: React.Dispatch<SetStateAction<boolean>>;
-}) {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-  async function loginToAccount() {
+
+  const handleLogin = async () => {
     setIsLoading(true);
-    if (username.length === 0 || password.length === 0) {
-      setError("You must enter an username and password");
+
+    if (!username || !password) {
+      setError("You must enter a username and password");
       return;
     }
 
     try {
-      const params: CreateUserRequest = {
-        email: username,
-        password: password,
-      };
       const res = await fetch(`${config.BACKEND_API_URL}/users/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: username, password }),
         credentials: "include",
       });
+
       if (!res.ok) {
-        setError(`Are you sure that account exists?`)
+        setError(
+          "Invalid credentials. Please check your username and password."
+        );
         return;
       }
-      const data = await res.json() as User;
-      if (!data) {
-        setError("Failed to get user");
-        return;
+
+      const userData = (await res.json()) as User;
+      if (userData) {
+        navigate("/");
       }
-      console.log(data);
-      navigate("/");
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-        return;
-      }
-      setError("Unknown error occurred. Try again later.");
+    } catch (err) {
+      setError("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
+
   return (
-    <>
-      <div className="gap-2">
-        {error.length > 0 && <p className="text-red-400">{error}</p>}
-      </div>
-      <div className="flex flex-col gap-2">
-        <LoginInput
-          updateState={setUsername}
-          placeholder="Enter your username"
-          value={username}
+    <div className="w-full max-w-sm space-y-4">
+      {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+
+      <div className="space-y-3">
+        <Input
           type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
-        <LoginInput
-          updateState={setPassword}
-          placeholder="Enter your password"
-          value={password}
+        <Input
           type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
       </div>
-      <div className="flex flex-col gap-2">
-      <button
-          className="bg-blue-200 hover:bg-blue-300 rounded-md gap-2 p-2"
-          onClick={loginToAccount}
-        >
+
+      <div className="space-y-2">
+        <Button onClick={handleLogin} className="w-full" disabled={isLoading}>
           {isLoading ? (
-            <span className="flex justify-center items-center w-full">
-              <LoaderCircle className="animate-spin" />
-            </span>
+            <LoaderCircle className="animate-spin h-4 w-4" />
           ) : (
             "Login"
           )}
-        </button>
-        <button
-          className="text-sm rounded-md"
+        </Button>
+
+        <Button
+          variant="link"
+          className="w-full text-sm"
           onClick={() => setIsSignIn(false)}
         >
           Don't have an account? Create one!
-        </button>
+        </Button>
       </div>
-    </>
+    </div>
   );
 }
 
-function LoginInput({
-  updateState,
-  placeholder,
-  value,
-  type,
+function CreateAccountForm({
+  setIsSignIn,
 }: {
-  updateState: React.Dispatch<React.SetStateAction<string>>;
-  placeholder: string;
-  value: string;
-  type: "text" | "password";
+  setIsSignIn: React.Dispatch<SetStateAction<boolean>>;
 }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleCreateAccount = async () => {
+    setIsLoading(true);
+
+    if (!username || !password) {
+      setError("You must enter a username and password.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${config.BACKEND_API_URL}/users/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: username, password }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        setError(errorData.error || "Failed to create account");
+        return;
+      }
+
+      setIsSignIn(true);
+    } catch (err) {
+      setError("Account creation failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <input
-      className="bg-gray-200 p-1 text-sm outline-1 rounded-md"
-      placeholder={placeholder}
-      onChange={(e) => updateState(e.target.value)}
-      type={type}
-      value={value}
-    />
+    <div className="w-full max-w-sm space-y-4">
+      {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+
+      <div className="space-y-3">
+        <Input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <Input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Button
+          onClick={handleCreateAccount}
+          className="w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <LoaderCircle className="animate-spin h-4 w-4" />
+          ) : (
+            "Create Account"
+          )}
+        </Button>
+
+        <Button
+          variant="link"
+          className="w-full text-sm"
+          onClick={() => setIsSignIn(true)}
+        >
+          Already have an account? Sign in.
+        </Button>
+      </div>
+    </div>
   );
 }
