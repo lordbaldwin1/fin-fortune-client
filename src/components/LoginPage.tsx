@@ -2,7 +2,7 @@ import { useState, type SetStateAction } from "react";
 import { config } from "../config";
 import type { User } from "../types/api";
 import { LoaderCircle } from "lucide-react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useAuth } from "@/auth/useAuth";
@@ -16,9 +16,11 @@ export default function LoginPage() {
       {user ? (
         <>
           <h1 className="text-2xl font-semibold">You are already signed in!</h1>
-          <Button variant={"link"}>
-            Click here to have your fortune told.
-          </Button>
+          <Link to={"/"}>
+            <Button variant={"link"}>
+              Click here to have your fortune told.
+            </Button>
+          </Link>
         </>
       ) : (
         <>
@@ -75,7 +77,10 @@ function LoginForm({
       if (userData) {
         navigate("/");
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error(
+        err instanceof Error ? err.message : "Unknown error occurred"
+      );
       setError("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
@@ -160,7 +165,10 @@ function CreateAccountForm({
       }
 
       setIsSignIn(true);
-    } catch (err) {
+    } catch (err: unknown) {
+      console.error(
+        err instanceof Error ? err.message : "Unknown error occurred"
+      );
       setError("Account creation failed. Please try again.");
     } finally {
       setIsLoading(false);

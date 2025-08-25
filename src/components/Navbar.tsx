@@ -9,8 +9,8 @@ export default function Navbar() {
   return (
     <div className="flex flex-row justify-between items-center p-2">
       <div className="flex flex-row items-center gap-4">
+        <Link to={`/`} className="text-muted-foreground hover:text-foreground hover:scale-101">home</Link>
         <Link to={`/fortunes`} className="text-muted-foreground hover:text-foreground hover:scale-101">past fortunes</Link>
-        <Link to={`/`} className="text-muted-foreground hover:text-foreground hover:scale-101">future fortunes</Link>
       </div>
       <div className="flex flex-row items-center">
         {loading ? (

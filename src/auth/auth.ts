@@ -36,14 +36,12 @@ export async function checkAuth() {
       }
 
       const user = (await newRes.json()) as User;
-      if (!user) {
-        return null;
-      }
       return user;
     }
 
     return null;
   } catch (err: unknown) {
+    console.error(err instanceof Error ? err.message : "Unknown error occurred");
     return null;
   }
 }

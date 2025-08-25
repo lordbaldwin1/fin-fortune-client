@@ -24,8 +24,7 @@ export type User = {
   createdAt: Date;
   updatedAt: Date;
   email: string;
-};
-
+} | null
 // export type RefreshResponse = {
 //   token: string;
 // };

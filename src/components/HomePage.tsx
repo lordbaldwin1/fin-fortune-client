@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router";
-import Navbar from "./Navbar";
 import { useAuth } from "../auth/useAuth";
 import { useEffect, useState, type SetStateAction } from "react";
 import { config } from "../config";
@@ -148,15 +147,16 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen flex flex-col overflow-hidden">
-      <Navbar />
 
       <div className="flex-1 overflow-auto flex items-center justify-center">
         <div className="max-w-2xl mx-auto px-4 w-full">
           <div className="text-center mb-8">
             <h1 className="text-5xl font-bold text-foreground mb-3">
-              the profit prophet
+              profit prophet
             </h1>
-            <p className="text-muted-foreground">the thread of fate is spun, but how it is woven is yours to see.</p>
+            <p className="text-muted-foreground">
+              the thread of fate is spun, but how it is woven is yours to see.
+            </p>
           </div>
           <div className="flex flex-col items-center gap-6">
             <div className="flex flex-col items-center gap-4">
@@ -173,17 +173,19 @@ export default function HomePage() {
                   className="px-8 py-3"
                   disabled={isLoading}
                 >
-                  {isLoading ? "loading..." : "reveal forbidden secrets"}
+                  {isLoading ? "loading..." : "reveal your fortune"}
                 </Button>
               ) : (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      size="lg"
-                      className="px-8 py-3 hover:cursor-not-allowed"
-                    >
-                      reveal forbidden secrets
-                    </Button>
+                    <Link to={"/login"}>
+                      <Button
+                        size="lg"
+                        className="px-8 py-3"
+                      >
+                        reveal your fortune
+                      </Button>
+                    </Link>
                   </TooltipTrigger>
                   <TooltipContent>
                     <Link to={"/login"}>sign in to get your fortune.</Link>
